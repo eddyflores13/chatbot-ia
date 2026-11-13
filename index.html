@@ -3,38 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Asistente de Cloud Computing</title>
+<title>Nubi - Asistente de Cloud Computing</title>
 <style>
   body{font-family:Arial,sans-serif;background:#f0f2f5;display:flex;justify-content:center;padding:20px}
-  #chat{width:100%;max-width:520px;background:#fff;border-radius:12px;box-shadow:0 2px 8px #0002;display:flex;flex-direction:column;height:90vh}
+  #chat{width:100%;max-width:540px;background:#fff;border-radius:12px;box-shadow:0 2px 8px #0002;display:flex;flex-direction:column;height:92vh}
   h1{font-size:18px;margin:0;padding:14px 16px;border-bottom:1px solid #ddd}
 
   /* ---------- Avatar ---------- */
   #avatarBox{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;border-bottom:1px solid #ddd;background:#f7faff}
-  #avatar{width:110px;height:110px;animation:flota 3s ease-in-out infinite}
+  .av{width:120px;height:120px;animation:flota 3s ease-in-out infinite}
+  img.av{border-radius:50%;object-fit:cover}
   #estadoTxt{font-size:13px;color:#555;margin-top:2px}
-  .ojo{transform-box:fill-box;transform-origin:center;animation:parpadeo 4s infinite}
-  #boca{transform-box:fill-box;transform-origin:center}
-  #antena{transform-box:fill-box;transform-origin:center;fill:#9ec5ff}
+  .ojo,#boca,.ceja{transform-box:fill-box;transform-origin:center}
+  .ojo{animation:parpadeo 4s infinite}
   @keyframes flota{50%{transform:translateY(-4px)}}
   @keyframes parpadeo{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
 
-  #chat.escuchando .ojo{animation:none;transform:scale(1.25)}
-  #chat.escuchando #antena{fill:#43a047}
+  #chat.escuchando .av{filter:drop-shadow(0 0 8px #43a047)}
+  #chat.escuchando .ojo{animation:none;transform:scale(1.2)}
 
-  #chat.pensando #antena{animation:pulso .6s infinite alternate}
-  @keyframes pulso{from{transform:scale(1);fill:#ffb300}to{transform:scale(1.5);fill:#ff6d00}}
+  #chat.pensando .av{filter:drop-shadow(0 0 8px #ff9800)}
+  #chat.pensando .ceja{animation:ceja .5s infinite alternate}
+  @keyframes ceja{to{transform:translateY(-5px)}}
 
-  #chat.hablando #avatar{animation:rebote .5s ease-in-out infinite;filter:drop-shadow(0 0 10px #0b79f7aa)}
+  #chat.hablando .av{animation:rebote .5s ease-in-out infinite;filter:drop-shadow(0 0 10px #0b79f7aa)}
   #chat.hablando #boca{animation:boca .25s infinite alternate}
-  #chat.hablando #antena{fill:#0b79f7}
   @keyframes rebote{50%{transform:translateY(-6px) rotate(1.5deg)}}
   @keyframes boca{from{transform:scaleY(1)}to{transform:scaleY(4)}}
 
   /* ---------- Opciones, mensajes y barra ---------- */
-  #opciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid #ddd;font-size:14px}
+  #opciones{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 16px;border-bottom:1px solid #ddd;font-size:14px}
   #opciones select{flex:1;min-width:150px;padding:6px}
   #opciones button{padding:6px 12px;border-radius:6px}
+  #conv{width:100%;padding:10px !important;font-size:15px !important}
+  #conv.activa{background:#e53935}
   #mensajes{flex:1;overflow-y:auto;padding:16px}
   .msg{margin:8px 0;padding:10px 14px;border-radius:14px;max-width:80%;white-space:pre-wrap;overflow-wrap:anywhere}
   .user{background:#0b79f7;color:#fff;margin-left:auto}
@@ -48,43 +50,65 @@
 </head>
 <body>
 <div id="chat">
-  <h1>☁️ Asistente de Cloud Computing</h1>
+  <h1>☁️ Nubi, tu asistente de Cloud Computing</h1>
 
   <div id="avatarBox">
-    <svg id="avatar" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Avatar del asistente">
-      <line x1="100" y1="22" x2="100" y2="48" stroke="#0b79f7" stroke-width="5"/>
-      <circle id="antena" cx="100" cy="16" r="9" stroke="#0b79f7" stroke-width="3"/>
-      <rect x="26" y="88" width="14" height="32" rx="6" fill="#0b79f7"/>
-      <rect x="160" y="88" width="14" height="32" rx="6" fill="#0b79f7"/>
-      <rect x="40" y="46" width="120" height="116" rx="32" fill="#e8f1ff" stroke="#0b79f7" stroke-width="5"/>
-      <ellipse class="ojo" cx="76" cy="92" rx="10" ry="13" fill="#1a2b49"/>
-      <ellipse class="ojo" cx="124" cy="92" rx="10" ry="13" fill="#1a2b49"/>
-      <circle cx="62" cy="114" r="7" fill="#ffb3c1" opacity=".7"/>
-      <circle cx="138" cy="114" r="7" fill="#ffb3c1" opacity=".7"/>
-      <ellipse id="boca" cx="100" cy="132" rx="15" ry="3.5" fill="#1a2b49"/>
+    <img id="avatarImg" class="av" alt="Avatar" hidden>
+    <svg id="avatar" class="av" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Avatar de Nubi">
+      <!-- cuerpo -->
+      <path d="M30 200 Q30 160 70 154 L130 154 Q170 160 170 200 Z" fill="#5b8def" stroke="#2b4c8c" stroke-width="4"/>
+      <!-- cara -->
+      <ellipse cx="100" cy="112" rx="64" ry="56" fill="#ffd9b8" stroke="#6b4a2f" stroke-width="4"/>
+      <!-- gorro de nube -->
+      <g fill="#fff" stroke="#5b8def" stroke-width="4">
+        <circle cx="68" cy="54" r="20"/>
+        <circle cx="100" cy="40" r="26"/>
+        <circle cx="134" cy="54" r="20"/>
+        <rect x="52" y="54" width="96" height="22" rx="6" stroke="none"/>
+      </g>
+      <line x1="52" y1="76" x2="148" y2="76" stroke="#5b8def" stroke-width="4" stroke-linecap="round"/>
+      <!-- ojos -->
+      <g class="ojo"><ellipse cx="76" cy="104" rx="11" ry="12" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="79" cy="106" r="4.5" fill="#222"/></g>
+      <g class="ojo"><ellipse cx="124" cy="104" rx="11" ry="12" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="121" cy="106" r="4.5" fill="#222"/></g>
+      <!-- cejas -->
+      <line class="ceja" x1="62" y1="86" x2="90" y2="92" stroke="#6b4a2f" stroke-width="5" stroke-linecap="round"/>
+      <line class="ceja" x1="138" y1="86" x2="110" y2="92" stroke="#6b4a2f" stroke-width="5" stroke-linecap="round"/>
+      <!-- mejillas y boca -->
+      <circle cx="60" cy="126" r="8" fill="#ffb3a7" opacity=".7"/>
+      <circle cx="140" cy="126" r="8" fill="#ffb3a7" opacity=".7"/>
+      <ellipse id="boca" cx="100" cy="140" rx="17" ry="3.5" fill="#7a1f1f"/>
     </svg>
     <div id="estadoTxt">En línea</div>
   </div>
 
   <div id="opciones">
+    <button id="conv">💬 Iniciar conversación continua</button>
     <label><input type="checkbox" id="leer" checked> Leer en voz alta</label>
     <select id="voces"></select>
-    <label>Velocidad <input type="range" id="velocidad" min="0.7" max="1.4" step="0.1" value="1"></label>
+    <label>Velocidad <input type="range" id="velocidad" min="0.7" max="1.4" step="0.05" value="1"></label>
+    <label>Tono <input type="range" id="tono" min="0.5" max="2" step="0.1" value="1"></label>
     <button id="probar">▶ Probar voz</button>
+    <button id="personaje">🎭 Voz de personaje</button>
   </div>
 
   <div id="mensajes"></div>
 
   <div id="barra">
-    <button id="mic" title="Hablar">🎤</button>
+    <button id="mic" title="Hablar una vez">🎤</button>
     <input id="entrada" placeholder="Escribe o pulsa 🎤 para hablar..." autocomplete="off">
     <button id="enviar">Enviar</button>
   </div>
 </div>
 
 <script>
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbycwMRIjUzQix0EUJ1SV9dSWUtazP4nPcGbioqTOXj3C2RKM_DMQ5bo2ar_bQ5hwmXI/exec";
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbytNdPNMur9ZXtDdFEoYVQEFvrJpJhvm6sptQW3aHg2HmRkIj7cV9uTOuNCOHu3Tfmc/exec";
+const AVATAR_IMG = ""; // opcional: nombre de una imagen que subas al repositorio, ej: "mi-avatar.png"
+
 let historial = [];
+let conversando = false;   // modo conversación continua
+let ocupado = false;       // true mientras la IA piensa o habla
+let escuchando = false;    // true mientras el micrófono está activo
+let silencios = 0;
 
 const chat = document.getElementById("chat");
 const caja = document.getElementById("mensajes");
@@ -92,8 +116,18 @@ const entrada = document.getElementById("entrada");
 const selVoces = document.getElementById("voces");
 const chkLeer = document.getElementById("leer");
 const velocidad = document.getElementById("velocidad");
+const tono = document.getElementById("tono");
 const btnMic = document.getElementById("mic");
+const btnConv = document.getElementById("conv");
 const txtEstado = document.getElementById("estadoTxt");
+
+/* ---------- Avatar propio (opcional) ---------- */
+if (AVATAR_IMG) {
+  const img = document.getElementById("avatarImg");
+  img.src = AVATAR_IMG;
+  img.hidden = false;
+  document.getElementById("avatar").style.display = "none";
+}
 
 /* ---------- Estado del avatar ---------- */
 const textosEstado = { "": "En línea", escuchando: "Escuchando…", pensando: "Pensando…", hablando: "Hablando…" };
@@ -143,40 +177,75 @@ let turno = 0; // evita que una voz vieja apague la animación de una nueva
 function detenerVoz() {
   turno++;
   if ("speechSynthesis" in window) speechSynthesis.cancel();
+  ocupado = false;
   setEstado("");
+}
+
+// Se llama cuando la IA terminó de hablar (o falló): en conversación continua vuelve a escuchar
+function finalizarTurno() {
+  ocupado = false;
+  setEstado("");
+  if (conversando) setTimeout(() => { if (conversando) iniciarEscucha(); }, 400);
 }
 
 function hablar(texto, forzar = false) {
   const mi = ++turno;
-  const limpio = texto.replace(/[*_`#>~]/g, "").replace(/\s+/g, " ");
+  const limpio = texto.replace(/[*_`#>~]/g, "").replace(/\s+/g, " ").trim();
   const hayVoz = "speechSynthesis" in window;
   if (hayVoz) speechSynthesis.cancel();
 
   // Sin voz: el avatar igual se mueve un rato, según el largo del texto
   if (!hayVoz || !(forzar || chkLeer.checked)) {
     setEstado("hablando");
-    setTimeout(() => { if (mi === turno) setEstado(""); },
+    setTimeout(() => { if (mi === turno) finalizarTurno(); },
       Math.min(Math.max(limpio.length * 45, 1500), 8000));
     return;
   }
 
-  const u = new SpeechSynthesisUtterance(limpio);
+  // Se divide en frases: Chrome corta las lecturas muy largas
+  const partes = (limpio.match(/[^.!?;:]+[.!?;:]*/g) || [limpio])
+    .map(p => p.trim()).filter(Boolean);
+  if (!partes.length) { finalizarTurno(); return; }
+
   const v = listaVoces[selVoces.value];
-  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "es-ES"; }
-  u.rate = parseFloat(velocidad.value);
-  u.onstart = () => { if (mi === turno) setEstado("hablando"); };
-  u.onend = u.onerror = () => { if (mi === turno) setEstado(""); };
   setEstado("hablando");
-  speechSynthesis.speak(u);
+  partes.forEach((p, i) => {
+    const u = new SpeechSynthesisUtterance(p);
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "es-ES"; }
+    u.rate = parseFloat(velocidad.value);
+    u.pitch = parseFloat(tono.value);
+    if (i === partes.length - 1) {
+      u.onend = u.onerror = () => { if (mi === turno) finalizarTurno(); };
+    }
+    speechSynthesis.speak(u);
+  });
 }
 
 document.getElementById("probar").onclick = () =>
-  hablar("Hola, soy tu asistente de cloud computing. ¿En qué te ayudo?", true);
+  hablar("Hola, soy Nubi, el asistente más inteligente de toda la nube.", true);
+document.getElementById("personaje").onclick = () => {
+  tono.value = 1.7;
+  velocidad.value = 1.15;
+  hablar("Hola, soy Nubi. Ya sé todo sobre la nube, así que pregunta rápido.", true);
+};
 selVoces.onchange = () => hablar("Hola, esta es mi voz.", true);
 
 /* ---------- Voz (entrada) ---------- */
 const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
 let reconocimiento = null;
+
+function iniciarEscucha() {
+  if (!reconocimiento || escuchando || ocupado) return;
+  try { reconocimiento.start(); } catch (e) {}
+}
+
+function terminarConversacion(msg) {
+  conversando = false;
+  btnConv.textContent = "💬 Iniciar conversación continua";
+  btnConv.classList.remove("activa");
+  if (reconocimiento && escuchando) { try { reconocimiento.stop(); } catch (e) {} }
+  if (msg) agregar(msg, "bot");
+}
 
 if (Rec) {
   reconocimiento = new Rec();
@@ -184,20 +253,45 @@ if (Rec) {
   reconocimiento.interimResults = false;
   reconocimiento.maxAlternatives = 1;
 
-  reconocimiento.onstart = () => { btnMic.classList.add("escuchando"); setEstado("escuchando"); };
+  reconocimiento.onstart = () => {
+    escuchando = true;
+    btnMic.classList.add("escuchando");
+    setEstado("escuchando");
+  };
+
   reconocimiento.onend = () => {
+    escuchando = false;
     btnMic.classList.remove("escuchando");
     if (estadoActual === "escuchando") setEstado("");
+    // Conversación continua: si no está pensando ni hablando, vuelve a escuchar
+    if (conversando && !ocupado) setTimeout(() => { if (conversando) iniciarEscucha(); }, 300);
   };
+
   reconocimiento.onerror = e => {
-    if (e.error === "no-speech") agregar("No te escuché, intenta de nuevo.", "bot");
-    else agregar("No pude usar el micrófono (" + e.error + "). Revisa los permisos del navegador.", "bot");
+    if (e.error === "no-speech") {
+      if (conversando) {
+        silencios++;
+        if (silencios >= 3) terminarConversacion("Me aburrí de esperar. Pulsa el botón cuando quieras seguir.");
+      } else {
+        agregar("No te escuché, intenta de nuevo.", "bot");
+      }
+    } else if (e.error !== "aborted") {
+      agregar("No pude usar el micrófono (" + e.error + "). Revisa los permisos del navegador.", "bot");
+      if (conversando) terminarConversacion();
+    }
   };
+
   reconocimiento.onresult = e => {
+    silencios = 0;
     const dicho = e.results[0][0].transcript.trim();
     const comando = dicho.toLowerCase().replace(/[.,!¡¿?]/g, "");
-    if (["silencio", "detente", "cállate"].includes(comando)) {
+    if (["silencio", "detente", "cállate", "callate"].includes(comando)) {
       detenerVoz();
+      return;
+    }
+    if (["terminar conversación", "terminar conversacion", "fin de la conversación"].includes(comando)) {
+      detenerVoz();
+      terminarConversacion("Ok, hablamos luego.");
       return;
     }
     entrada.value = dicho;
@@ -205,13 +299,33 @@ if (Rec) {
   };
 }
 
+// Micrófono de una sola vez
 btnMic.onclick = () => {
   if (!reconocimiento) {
     agregar("Tu navegador no admite reconocimiento de voz. Usa Chrome o Edge.", "bot");
     return;
   }
   detenerVoz();
-  try { reconocimiento.start(); } catch (e) {}
+  iniciarEscucha();
+};
+
+// Conversación continua
+btnConv.onclick = () => {
+  if (!reconocimiento) {
+    agregar("Tu navegador no admite reconocimiento de voz. Usa Chrome o Edge.", "bot");
+    return;
+  }
+  if (conversando) {
+    terminarConversacion();
+    detenerVoz();
+    return;
+  }
+  conversando = true;
+  silencios = 0;
+  btnConv.textContent = "⏹ Terminar conversación";
+  btnConv.classList.add("activa");
+  detenerVoz();
+  iniciarEscucha();
 };
 
 /* ---------- Enviar al backend ---------- */
@@ -220,8 +334,9 @@ async function enviar() {
   if (!texto) return;
   entrada.value = "";
   detenerVoz();
+  ocupado = true;
   agregar(texto, "user");
-  const espera = agregar("Escribiendo...", "bot");
+  const espera = agregar("Pensando...", "bot");
   setEstado("pensando");
   try {
     const r = await fetch(URL_BACKEND, {
@@ -237,18 +352,18 @@ async function enviar() {
       hablar(datos.respuesta);
     } else {
       espera.textContent = datos.error || "Ocurrió un error.";
-      setEstado("");
+      finalizarTurno();
     }
   } catch (e) {
     espera.textContent = "No pude conectar con el servidor.";
-    setEstado("");
+    finalizarTurno();
   }
 }
 
 document.getElementById("enviar").onclick = enviar;
 entrada.addEventListener("keydown", e => { if (e.key === "Enter") enviar(); });
 
-agregar("¡Hola! Soy tu asistente de Cloud Computing ☁️. Escríbeme o pulsa 🎤 para hablarme. Pregúntame sobre AWS, Azure, Google Cloud, serverless y más.", "bot");
+agregar("Ay, qué bien, otro estudiante que quiere entender la nube. Tranquilo, yo te explico. Pulsa 💬 para hablar conmigo por voz, o escríbeme.", "bot");
 </script>
 </body>
 </html>
