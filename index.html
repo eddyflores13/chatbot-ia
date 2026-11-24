@@ -4,105 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nubi - Asistente de Cloud Computing</title>
+
 <style>
-  body{font-family:Arial,sans-serif;background:#f0f2f5;display:flex;justify-content:center;padding:20px}
-  #chat{width:100%;max-width:540px;background:#fff;border-radius:12px;box-shadow:0 2px 8px #0002;display:flex;flex-direction:column;height:92vh}
-  h1{font-size:18px;margin:0;padding:14px 16px;border-bottom:1px solid #ddd}
-
-  /* ---------- Avatar ---------- */
-  #avatarBox{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;border-bottom:1px solid #ddd;background:#f7faff}
-  .av{width:120px;height:120px;animation:flota 3s ease-in-out infinite}
-  img.av{border-radius:50%;object-fit:cover}
-  #estadoTxt{font-size:13px;color:#555;margin-top:2px}
-  .ojo,#boca,.ceja{transform-box:fill-box;transform-origin:center}
-  .ojo{animation:parpadeo 4s infinite}
-  @keyframes flota{50%{transform:translateY(-4px)}}
-  @keyframes parpadeo{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
-
-  #chat.escuchando .av{filter:drop-shadow(0 0 8px #43a047)}
-  #chat.escuchando .ojo{animation:none;transform:scale(1.2)}
-
-  #chat.pensando .av{filter:drop-shadow(0 0 8px #ff9800)}
-  #chat.pensando .ceja{animation:ceja .5s infinite alternate}
-  @keyframes ceja{to{transform:translateY(-5px)}}
-
-  #chat.hablando .av{animation:rebote .5s ease-in-out infinite;filter:drop-shadow(0 0 10px #0b79f7aa)}
-  #chat.hablando #boca{animation:boca .25s infinite alternate}
-  @keyframes rebote{50%{transform:translateY(-6px) rotate(1.5deg)}}
-  @keyframes boca{from{transform:scaleY(1)}to{transform:scaleY(4)}}
-
-  /* ---------- Opciones, mensajes y barra ---------- */
-  #opciones{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 16px;border-bottom:1px solid #ddd;font-size:14px}
-  #opciones select{flex:1;min-width:150px;padding:6px}
-  #opciones button{padding:6px 12px;border-radius:6px}
-  #conv{width:100%;padding:10px !important;font-size:15px !important}
-  #conv.activa{background:#e53935}
-  #mensajes{flex:1;overflow-y:auto;padding:16px}
-  .msg{margin:8px 0;padding:10px 14px;border-radius:14px;max-width:80%;white-space:pre-wrap;overflow-wrap:anywhere}
-  .user{background:#0b79f7;color:#fff;margin-left:auto}
-  .bot{background:#e9ebef}
-  #barra{display:flex;border-top:1px solid #ddd}
-  #entrada{flex:1;border:0;padding:14px;font-size:16px;outline:none;min-width:0}
-  button{border:0;background:#0b79f7;color:#fff;padding:0 18px;font-size:16px;cursor:pointer}
-  #mic{background:#e9ebef;color:#000;font-size:20px}
+  *{box-sizing:border-box}
+  body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#eaf4ff,#f7f2ff);margin:0;min-height:100vh;padding:22px;color:#243247}
+  #chat{width:100%;max-width:1240px;height:min(920px,calc(100vh - 44px));min-height:620px;margin:auto;background:#fff;border:1px solid #e4eaf3;border-radius:22px;box-shadow:0 18px 55px #243b5a1c;display:grid;grid-template-columns:minmax(280px,340px) minmax(0,1fr);overflow:hidden}
+  #sidePanel{background:linear-gradient(180deg,#f1f8ff,#f7f5ff);border-right:1px solid #e2eaf4;display:flex;flex-direction:column;min-width:0;overflow-y:auto}
+  .brand{padding:22px 20px 8px;text-align:center}
+  .brandMark{font-size:13px;font-weight:700;letter-spacing:2px;color:#4386c8;text-transform:uppercase}
+  .brand h2{font-size:25px;margin:6px 0 0;color:#203c5b}
+  .brand p{font-size:13px;color:#72839a;margin:6px 0 0}
+  #avatarBox{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 12px 4px;background:transparent}
+  .av{width:min(100%,320px);height:auto;aspect-ratio:1;object-fit:contain;overflow:visible;filter:drop-shadow(0 14px 12px #7a3b1a26);transition:filter .4s}
+  img.av{animation:flota 3.4s ease-in-out infinite}
+  #estadoTxt{font-size:13px;color:#4d789d;margin-top:-4px;padding:6px 13px;border-radius:30px;background:#e2f2ff}
+  @keyframes flota{50%{transform:translateY(-5px)}}
+  #chat.escuchando .av{filter:drop-shadow(0 0 16px #43a04799)}
+  #chat.pensando .av{filter:drop-shadow(0 0 16px #ff980099)}
+  #chat.hablando .av{filter:drop-shadow(0 0 18px #0b79f77a)}
+  #opciones{display:flex;flex-direction:column;gap:12px;align-items:stretch;padding:12px 20px 22px;font-size:13px}
+  #opciones select{width:100%;min-width:0;padding:10px;border:1px solid #d7e2ef;border-radius:10px;background:#fff;color:#30445b}
+  #opciones button{padding:10px 12px;border-radius:10px}
+  #opciones label{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .control-voz{display:flex;flex-direction:column;gap:6px;min-width:0;width:100%;font-weight:600;color:#53677e}
+  .control-voz input[type="range"]{width:100%;accent-color:#0b79f7}
+  #perfilVoz{font-weight:600}
+  #guardarAviso{width:100%;font-size:11px;color:#64816a;min-height:14px;line-height:1.4}
+  #conv{width:100%;padding:11px !important;font-size:13px !important;background:#e8f2ff;color:#2466a6;border:1px solid #d4e7ff}
+  #conv.activa{background:#e53935;color:white}
+  #chatPanel{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+  h1{font-size:19px;margin:0;padding:22px 24px;border-bottom:1px solid #edf0f5;color:#263d58;display:flex;align-items:center;gap:9px}
+  h1 span{font-size:13px;font-weight:400;color:#8291a5;margin-left:auto}
+  #mensajes{flex:1;overflow-y:auto;padding:22px 24px;background:linear-gradient(#fff,#fcfdff)}
+  .msg{margin:10px 0;padding:12px 15px;border-radius:16px;max-width:78%;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;font-size:14px}
+  .user{background:#0b79f7;color:#fff;margin-left:auto;border-bottom-right-radius:5px}
+  .bot{background:#edf2f8;color:#30445b;border-bottom-left-radius:5px}
+  #barra{display:flex;gap:9px;border-top:1px solid #edf0f5;padding:14px 18px;background:#fff}
+  #entrada{flex:1;border:1px solid #dce5ef;border-radius:12px;padding:13px 15px;font-size:15px;outline:none;min-width:0}
+  #entrada:focus{border-color:#7db7f2;box-shadow:0 0 0 3px #dceeff}
+  button{border:0;background:#0b79f7;color:#fff;padding:0 18px;font-size:14px;cursor:pointer;transition:filter .2s}
+  button:hover{filter:brightness(.95)}
+  #mic{background:#edf2f8;color:#29425f;font-size:20px;border-radius:12px;width:48px}
   #mic.escuchando{background:#e53935;color:#fff}
+  #enviar{border-radius:12px;font-weight:600}
+  @media(max-width:760px){
+    body{padding:0;background:#f4f7fb}
+    #chat{height:100dvh;min-height:0;border-radius:0;border:0;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);overflow:hidden}
+    #sidePanel{border-right:0;border-bottom:1px solid #e2eaf4;display:grid;grid-template-columns:minmax(105px,34%) minmax(0,1fr);grid-template-rows:auto 1fr;max-height:310px;overflow:auto}
+    .brand{grid-column:1/-1;padding:10px 14px 2px}
+    .brandMark{font-size:10px}
+    .brand h2{font-size:19px}
+    .brand p{display:none}
+    #avatarBox{grid-column:1;grid-row:2;padding:4px}
+    .av{width:100%;max-width:170px}
+    #estadoTxt{font-size:11px;margin-top:-6px}
+    #opciones{grid-column:2;grid-row:2;padding:8px 12px;gap:7px;font-size:11px;overflow:auto}
+    #opciones select{padding:7px;font-size:12px}
+    #opciones button{padding:8px;font-size:12px}
+    #conv{font-size:11px !important;padding:8px !important}
+    #guardarAviso{font-size:10px}
+    #chatPanel{min-height:0}
+    h1{padding:12px 15px;font-size:16px}
+    h1 span{display:none}
+    #mensajes{padding:14px}
+    .msg{max-width:88%;font-size:13px}
+    #barra{padding:10px;gap:7px}
+    #entrada{padding:11px;font-size:14px}
+    #mic{width:42px}
+    #enviar{padding:0 13px}
+  }
 </style>
+
 </head>
 <body>
 <div id="chat">
-  <h1>☁️ Nubi, tu asistente de Cloud Computing</h1>
+  <aside id="sidePanel">
+    <div class="brand">
+      <div class="brandMark">☁️ Asistente virtual</div>
+      <h2>Nubi</h2>
+      <p>Tu compañero para aprender en la nube</p>
+    </div>
 
-  <div id="avatarBox">
-    <img id="avatarImg" class="av" alt="Avatar" hidden>
-    <svg id="avatar" class="av" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Avatar de Nubi">
-      <!-- cuerpo -->
-      <path d="M30 200 Q30 160 70 154 L130 154 Q170 160 170 200 Z" fill="#5b8def" stroke="#2b4c8c" stroke-width="4"/>
-      <!-- cara -->
-      <ellipse cx="100" cy="112" rx="64" ry="56" fill="#ffd9b8" stroke="#6b4a2f" stroke-width="4"/>
-      <!-- gorro de nube -->
-      <g fill="#fff" stroke="#5b8def" stroke-width="4">
-        <circle cx="68" cy="54" r="20"/>
-        <circle cx="100" cy="40" r="26"/>
-        <circle cx="134" cy="54" r="20"/>
-        <rect x="52" y="54" width="96" height="22" rx="6" stroke="none"/>
-      </g>
-      <line x1="52" y1="76" x2="148" y2="76" stroke="#5b8def" stroke-width="4" stroke-linecap="round"/>
-      <!-- ojos -->
-      <g class="ojo"><ellipse cx="76" cy="104" rx="11" ry="12" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="79" cy="106" r="4.5" fill="#222"/></g>
-      <g class="ojo"><ellipse cx="124" cy="104" rx="11" ry="12" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="121" cy="106" r="4.5" fill="#222"/></g>
-      <!-- cejas -->
-      <line class="ceja" x1="62" y1="86" x2="90" y2="92" stroke="#6b4a2f" stroke-width="5" stroke-linecap="round"/>
-      <line class="ceja" x1="138" y1="86" x2="110" y2="92" stroke="#6b4a2f" stroke-width="5" stroke-linecap="round"/>
-      <!-- mejillas y boca -->
-      <circle cx="60" cy="126" r="8" fill="#ffb3a7" opacity=".7"/>
-      <circle cx="140" cy="126" r="8" fill="#ffb3a7" opacity=".7"/>
-      <ellipse id="boca" cx="100" cy="140" rx="17" ry="3.5" fill="#7a1f1f"/>
-    </svg>
-    <div id="estadoTxt">En línea</div>
-  </div>
+    <div id="avatarBox">
+      <img id="avatarImg" class="av" alt="Nubi, un perrito dentro de una taza" hidden>
+      <svg id="avatar" class="av" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nubi, un perrito dentro de una taza de madera">
+        <defs>
+          <linearGradient id="madera" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2692f"/><stop offset="1" stop-color="#a23d1b"/></linearGradient>
+        </defs>
+        <ellipse cx="150" cy="288" rx="104" ry="10" fill="#f59e3a" opacity=".55"/>
+        <rect x="105" y="262" width="90" height="20" rx="6" fill="#7d2f15"/>
+        <ellipse cx="150" cy="176" rx="112" ry="24" fill="#5a2412"/>
+        <g id="gPerro">
+          <g id="orejaI"><path d="M96 82 Q58 70 54 102 Q54 128 90 122 Z" fill="#fffdf8" stroke="#4a2e1c" stroke-width="3.5" stroke-linejoin="round"/></g>
+          <g id="orejaD"><path d="M204 82 Q242 70 246 102 Q246 128 210 122 Z" fill="#fffdf8" stroke="#4a2e1c" stroke-width="3.5" stroke-linejoin="round"/></g>
+          <ellipse cx="150" cy="152" rx="62" ry="56" fill="#fffdf8" stroke="#4a2e1c" stroke-width="3.5"/>
+          <g id="gCabeza">
+            <ellipse cx="150" cy="100" rx="66" ry="56" fill="#fffdf8" stroke="#4a2e1c" stroke-width="3.5"/>
+            <circle cx="108" cy="114" r="11" fill="#ff8f9c" opacity=".5"/><circle cx="192" cy="114" r="11" fill="#ff8f9c" opacity=".5"/>
+            <path id="cejaI" d="M104 80 Q119 70 136 83" fill="none" stroke="#3a2410" stroke-width="5.5" stroke-linecap="round"/>
+            <path id="cejaD" d="M196 80 Q181 70 164 83" fill="none" stroke="#3a2410" stroke-width="5.5" stroke-linecap="round"/>
+            <ellipse id="ojoI" cx="124" cy="98" rx="5" ry="6.5" fill="#2a1a10"/>
+            <ellipse id="ojoD" cx="176" cy="98" rx="5" ry="6.5" fill="#2a1a10"/>
+            <ellipse cx="150" cy="113" rx="9.5" ry="7" fill="#3a2410"/>
+            <ellipse id="boca" cx="150" cy="129" rx="12" ry="5" fill="#7a1f1f"/>
+            <path id="sonrisa" d="M136 126 Q150 138 164 126" fill="none" stroke="#3a2410" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+        </g>
+        <g id="gTaza">
+          <path d="M38 176 Q150 224 262 176 Q256 268 150 272 Q44 268 38 176 Z" fill="url(#madera)" stroke="#6b2410" stroke-width="4" stroke-linejoin="round"/>
+          <g fill="none" stroke="#8f3318" stroke-width="2.5" stroke-linecap="round" opacity=".5">
+            <path d="M70 215 Q90 235 85 258"/><path d="M110 208 Q135 238 120 264"/><path d="M172 212 Q197 242 182 267"/><path d="M226 210 Q214 236 232 252"/>
+          </g>
+          <path d="M56 200 Q60 236 80 256" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".22"/>
+          <g fill="#fffdf8" stroke="#4a2e1c" stroke-width="3.5" stroke-linecap="round">
+            <ellipse cx="112" cy="196" rx="17" ry="11"/><path d="M106 192 v8 M114 190 v10" fill="none" stroke-width="2.5"/>
+            <ellipse cx="188" cy="196" rx="17" ry="11"/><path d="M186 190 v10 M194 192 v8" fill="none" stroke-width="2.5"/>
+          </g>
+        </g>
+      </svg>
+      <div id="estadoTxt">En línea</div>
+    </div>
 
-  <div id="opciones">
-    <button id="conv">💬 Iniciar conversación continua</button>
-    <label><input type="checkbox" id="leer" checked> Leer en voz alta</label>
-    <select id="voces"></select>
-    <label>Velocidad <input type="range" id="velocidad" min="0.7" max="1.4" step="0.05" value="1"></label>
-    <label>Tono <input type="range" id="tono" min="0.5" max="2" step="0.1" value="1"></label>
-    <button id="probar">▶ Probar voz</button>
-    <button id="personaje">🎭 Voz de personaje</button>
-  </div>
+    <div id="opciones">
+      <button id="conv">💬 Iniciar conversación continua</button>
+      <label><input type="checkbox" id="leer" checked> Leer respuestas en voz alta</label>
+      <label class="control-voz">Personalidad de voz
+        <select id="perfilVoz">
+          <option value="nubi">🐶 Nubi (alegre y travieso)</option>
+          <option value="villano">😈 Villano (grave y lento)</option>
+          <option value="robot">🤖 Robot (metálico)</option>
+          <option value="anciano">🧓 Anciano (pausado)</option>
+          <option value="presentador">🎙️ Presentador (enérgico)</option>
+          <option value="dulce">🌸 Dulce (suave y agudo)</option>
+        </select>
+      </label>
+      <label class="control-voz">Voz del navegador
+        <select id="voces" aria-label="Voz del navegador"></select>
+      </label>
+      <label class="control-voz">Velocidad <input type="range" id="velocidad" min="0.7" max="1.4" step="0.05" value="1"><span id="valorVelocidad">1.00</span></label>
+      <label class="control-voz">Tono <input type="range" id="tono" min="0.5" max="2" step="0.1" value="1"><span id="valorTono">1.0</span></label>
+      <button id="probar">▶ Probar voz</button>
+      <div id="guardarAviso" aria-live="polite">Los ajustes de voz se guardan en este navegador.</div>
+    </div>
+  </aside>
 
-  <div id="mensajes"></div>
-
-  <div id="barra">
-    <button id="mic" title="Hablar una vez">🎤</button>
-    <input id="entrada" placeholder="Escribe o pulsa 🎤 para hablar..." autocomplete="off">
-    <button id="enviar">Enviar</button>
-  </div>
+  <main id="chatPanel">
+    <h1>💬 Conversa con Nubi <span>Asistente de Cloud Computing</span></h1>
+    <div id="mensajes"></div>
+    <div id="barra">
+      <button id="mic" title="Hablar una vez">🎤</button>
+      <input id="entrada" placeholder="Escribe o pulsa 🎤 para hablar..." autocomplete="off">
+      <button id="enviar">Enviar</button>
+    </div>
+  </main>
 </div>
 
 <script>
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbytNdPNMur9ZXtDdFEoYVQEFvrJpJhvm6sptQW3aHg2HmRkIj7cV9uTOuNCOHu3Tfmc/exec";
-const AVATAR_IMG = ""; // opcional: nombre de una imagen que subas al repositorio, ej: "mi-avatar.png"
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbzlhf6g0SuK9dnP0h24y2EgVlH2sAIIMRmNDz9oWG89U-Bakvniq0zC48r7kt3ksf29/exec";
+const AVATAR_IMG = ""; // opcional: nombre de una imagen propia (se verá estática) // Imagen integrada de Nubi: perrito dentro de una taza
 
 let historial = [];
 let conversando = false;   // modo conversación continua
@@ -117,6 +176,9 @@ const selVoces = document.getElementById("voces");
 const chkLeer = document.getElementById("leer");
 const velocidad = document.getElementById("velocidad");
 const tono = document.getElementById("tono");
+const perfilVoz = document.getElementById("perfilVoz");
+const valorVelocidad = document.getElementById("valorVelocidad");
+const valorTono = document.getElementById("valorTono");
 const btnMic = document.getElementById("mic");
 const btnConv = document.getElementById("conv");
 const txtEstado = document.getElementById("estadoTxt");
@@ -149,11 +211,82 @@ function agregar(texto, clase) {
   return d;
 }
 
+/* ---------- Perfiles de voz y ajustes guardados ---------- */
+// Los perfiles modifican la velocidad y el tono de la voz elegida.
+// La voz real disponible depende del navegador y del sistema operativo.
+const perfilesVoz = {
+  nubi:       { rate: 1.12, pitch: 1.55 },
+  villano:    { rate: 0.85, pitch: 0.65 },
+  robot:      { rate: 1.05, pitch: 0.80 },
+  anciano:    { rate: 0.88, pitch: 0.80 },
+  presentador:{ rate: 1.08, pitch: 1.10 },
+  dulce:      { rate: 0.95, pitch: 1.35 }
+};
+
+const CLAVE_AJUSTES_VOZ = "nubi_ajustes_voz_v1";
+
+function actualizarLecturas() {
+  valorVelocidad.textContent = Number(velocidad.value).toFixed(2);
+  valorTono.textContent = Number(tono.value).toFixed(1);
+}
+
+function guardarAjustesVoz() {
+  actualizarLecturas();
+  const ajustes = {
+    perfil: perfilVoz.value,
+    velocidad: velocidad.value,
+    tono: tono.value,
+    voz: listaVoces[selVoces.value]?.name || "",
+    leer: chkLeer.checked
+  };
+  try {
+    localStorage.setItem(CLAVE_AJUSTES_VOZ, JSON.stringify(ajustes));
+  } catch (e) {
+    // El chat sigue funcionando aunque el navegador bloquee el almacenamiento.
+  }
+}
+
+function cargarAjustesGuardados() {
+  try {
+    const guardados = JSON.parse(localStorage.getItem(CLAVE_AJUSTES_VOZ) || "null");
+    if (!guardados) { actualizarLecturas(); return; }
+    if (perfilesVoz[guardados.perfil]) perfilVoz.value = guardados.perfil;
+    if (guardados.velocidad) velocidad.value = guardados.velocidad;
+    if (guardados.tono) tono.value = guardados.tono;
+    if (typeof guardados.leer === "boolean") chkLeer.checked = guardados.leer;
+    window.nubiVozGuardada = guardados.voz || "";
+  } catch (e) {
+    actualizarLecturas();
+  }
+}
+
+function aplicarPerfil(nombre, guardar = true) {
+  const perfil = perfilesVoz[nombre] || perfilesVoz.nubi;
+  perfilVoz.value = perfilesVoz[nombre] ? nombre : "nubi";
+  velocidad.value = perfil.rate;
+  tono.value = perfil.pitch;
+  actualizarLecturas();
+  if (guardar) guardarAjustesVoz();
+}
+
+cargarAjustesGuardados();
+if (!localStorage.getItem(CLAVE_AJUSTES_VOZ)) aplicarPerfil("nubi", false);
+perfilVoz.addEventListener("change", () => aplicarPerfil(perfilVoz.value));
+velocidad.addEventListener("input", () => {
+  actualizarLecturas();
+  guardarAjustesVoz();
+});
+tono.addEventListener("input", () => {
+  actualizarLecturas();
+  guardarAjustesVoz();
+});
+chkLeer.addEventListener("change", guardarAjustesVoz);
+
 /* ---------- Voces (salida) ---------- */
 let listaVoces = [];
 
 function cargarVoces() {
-  const actual = listaVoces[selVoces.value]?.name;
+  const actual = listaVoces[selVoces.value]?.name || window.nubiVozGuardada || "";
   const todas = speechSynthesis.getVoices();
   const es = todas.filter(v => v.lang.toLowerCase().startsWith("es"));
   listaVoces = es.length ? es : todas;
@@ -166,6 +299,11 @@ function cargarVoces() {
   });
   const idx = listaVoces.findIndex(v => v.name === actual);
   if (idx >= 0) selVoces.value = idx;
+  if (listaVoces.length && !window.nubiVozGuardada && idx < 0) {
+    const preferida = listaVoces.findIndex(v => /es[-_](MX|US|419)/i.test(v.lang));
+    if (preferida >= 0) selVoces.value = preferida;
+  }
+  guardarAjustesVoz();
 }
 if ("speechSynthesis" in window) {
   cargarVoces();
@@ -214,6 +352,7 @@ function hablar(texto, forzar = false) {
     if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "es-ES"; }
     u.rate = parseFloat(velocidad.value);
     u.pitch = parseFloat(tono.value);
+    u.onboundary = () => { window.pulsoBoca = 1; };
     if (i === partes.length - 1) {
       u.onend = u.onerror = () => { if (mi === turno) finalizarTurno(); };
     }
@@ -221,14 +360,21 @@ function hablar(texto, forzar = false) {
   });
 }
 
-document.getElementById("probar").onclick = () =>
-  hablar("Hola, soy Nubi, el asistente más inteligente de toda la nube.", true);
-document.getElementById("personaje").onclick = () => {
-  tono.value = 1.7;
-  velocidad.value = 1.15;
-  hablar("Hola, soy Nubi. Ya sé todo sobre la nube, así que pregunta rápido.", true);
+document.getElementById("probar").onclick = () => {
+  const ejemplos = {
+    nubi: "¡Hola! Soy Nubi, el asistente más inteligente de toda la nube. ¿Qué necesitas?",
+    villano: "Vaya, vaya... ¿Así que quieres conocer los secretos de la nube?",
+    robot: "Sistema iniciado. Estoy listo para procesar tu pregunta.",
+    anciano: "Con calma, joven. Te explicaré todo paso a paso.",
+    presentador: "¡Muy buenas! Hoy aprenderemos algo increíble sobre Cloud Computing.",
+    dulce: "¡Hola! Qué gusto ayudarte. Vamos a aprender juntos."
+  };
+  hablar(ejemplos[perfilVoz.value] || ejemplos.nubi, true);
 };
-selVoces.onchange = () => hablar("Hola, esta es mi voz.", true);
+selVoces.onchange = () => {
+  guardarAjustesVoz();
+  hablar("Hola, esta es la voz que has seleccionado.", true);
+};
 
 /* ---------- Voz (entrada) ---------- */
 const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -364,6 +510,66 @@ document.getElementById("enviar").onclick = enviar;
 entrada.addEventListener("keydown", e => { if (e.key === "Enter") enviar(); });
 
 agregar("Ay, qué bien, otro estudiante que quiere entender la nube. Tranquilo, yo te explico. Pulsa 💬 para hablar conmigo por voz, o escríbeme.", "bot");
+
+/* ---------- Animación fluida del perrito ---------- */
+(function () {
+  const $ = id => document.getElementById(id);
+  const svg = $("avatar");
+  if (!svg || svg.style.display === "none") return;
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0.3 : 1;
+  const e = { perro:$("gPerro"), cab:$("gCabeza"), oI:$("orejaI"), oD:$("orejaD"), eI:$("ojoI"), eD:$("ojoD"),
+              cI:$("cejaI"), cD:$("cejaD"), boca:$("boca"), sonrisa:$("sonrisa"), taza:$("gTaza") };
+  let objX = 0, objY = 0, px = 0, py = 0, lagX = 0, abierta = 0, ultParp = -1000, proxParp = 1500;
+  let sBob = 0, sLadea = 0, sCeja = 0, sOjos = 1;
+  window.pulsoBoca = 0;
+
+  addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect();
+    objX = Math.max(-1, Math.min(1, (ev.clientX - (r.left + r.width / 2)) / (innerWidth / 2)));
+    objY = Math.max(-1, Math.min(1, (ev.clientY - (r.top + r.height / 2)) / (innerHeight / 2)));
+  });
+
+  const escY = (k, cy) => "translate(0 " + cy + ") scale(1 " + k + ") translate(0 " + (-cy) + ")";
+  const lerp = (a, b, k) => a + (b - a) * k;
+
+  function frame(t) {
+    const est = estadoActual;
+    px = lerp(px, objX, 0.07);
+    py = lerp(py, objY, 0.07);
+    lagX = lerp(lagX, px, 0.05);
+    const resp = Math.sin(t / 900);
+
+    const hablando = est === "hablando";
+    sBob   = lerp(sBob,   hablando ? Math.sin(t / 150) * 3 : 0, 0.2);
+    sLadea = lerp(sLadea, est === "pensando" ? -7 : (hablando ? Math.sin(t / 330) * 3 : 0), 0.08);
+    sCeja  = lerp(sCeja,  est === "pensando" ? -6 : (est === "escuchando" ? -3 : 0), 0.12);
+    sOjos  = lerp(sOjos,  est === "escuchando" ? 1.2 : 1, 0.12);
+
+    if (t > proxParp) { ultParp = t; proxParp = t + 2500 + Math.random() * 3500; }
+    const d = t - ultParp;
+    const parp = d < 140 ? 1 - Math.sin(Math.PI * d / 140) * 0.92 : 1;
+
+    const osc = hablando ? (0.35 + 0.65 * Math.abs(Math.sin(t / 105))) * (0.65 + 0.35 * Math.sin(t / 390)) : 0;
+    window.pulsoBoca *= 0.88;
+    abierta = lerp(abierta, Math.max(osc, window.pulsoBoca), 0.4);
+
+    e.perro.setAttribute("transform", "translate(0 " + (sBob + resp * 1.5 * RM) + ") " + escY(1 + resp * 0.014 * RM, 200));
+    e.cab.setAttribute("transform", "translate(" + (px * 7 * RM) + " " + (py * 4 * RM) + ") rotate(" + (px * 5 * RM + sLadea) + " 150 156)");
+    const oreja = (px - lagX) * 45 * RM + Math.sin(t / 760) * 1.8 * RM + sBob * 0.8;
+    e.oI.setAttribute("transform", "rotate(" + oreja + " 96 82)");
+    e.oD.setAttribute("transform", "rotate(" + oreja + " 204 82)");
+    const mir = "translate(" + (px * 2.5) + " " + (py * 2) + ") " + escY(parp * sOjos, 98);
+    e.eI.setAttribute("transform", mir);
+    e.eD.setAttribute("transform", mir);
+    e.cI.setAttribute("transform", "translate(0 " + sCeja + ")");
+    e.cD.setAttribute("transform", "translate(0 " + sCeja + ")");
+    e.boca.setAttribute("transform", escY(0.25 + abierta * 1.9, 129));
+    e.sonrisa.setAttribute("opacity", 1 - Math.min(1, abierta * 2.5));
+    e.taza.setAttribute("transform", escY(1 + sBob * 0.003, 272));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
